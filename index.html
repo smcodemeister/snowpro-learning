@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SnowPro Platform Flashcards</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #050d1a;
+      --surface: #0a1628;
+      --card-front: #0d1e35;
+      --card-back: #061223;
+      --border: rgba(41, 182, 246, 0.18);
+      --accent: #29b6f6;
+      --accent2: #00e5ff;
+      --text: #e8f4fd;
+      --muted: #6b9ab8;
+      --tag: #112240;
+      --green: #00e676;
+      --orange: #ff9800;
+      --red: #ef5350;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(41,182,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41,182,246,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -30%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(41,182,246,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 560px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .snowflake-icon {
+      width: 32px;
+      height: 32px;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    .progress-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Category chips */
+    .category-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: var(--tag);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .chip.active {
+      background: rgba(41,182,246,0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .chip:hover:not(.active) {
+      border-color: rgba(41,182,246,0.4);
+      color: var(--text);
+    }
+
+    /* Card */
+    .card-container {
+      perspective: 1200px;
+      height: 380px;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+      cursor: pointer;
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 32px;
+      overflow: hidden;
+    }
+
+    /* Glow effect on card */
+    .card-face::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px; right: -1px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.6;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .card-front {
+      background: var(--card-front);
+    }
+
+    .card-back {
+      background: var(--card-back);
+      transform: rotateY(180deg);
+    }
+
+    .card-back::before {
+      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    }
+
+    .card-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(41,182,246,0.1);
+      border: 1px solid rgba(41,182,246,0.2);
+      border-radius: 6px;
+      padding: 4px 10px;
+      align-self: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .card-back .card-tag {
+      color: var(--accent2);
+      background: rgba(0,229,255,0.08);
+      border-color: rgba(0,229,255,0.2);
+    }
+
+    .card-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-text {
+      font-size: clamp(16px, 4vw, 22px);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .card-back .card-text {
+      font-size: clamp(14px, 3.5vw, 18px);
+      font-weight: 400;
+      color: #b8d4e8;
+      font-family: 'DM Mono', monospace;
+      line-height: 1.7;
+      text-align: left;
+    }
+
+    .card-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .hint-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* Corner decoration */
+    .corner-deco {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      opacity: 0.07;
+    }
+
+    /* Controls */
+    .controls-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .controls-secondary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-prev, .btn-next {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .btn-prev:hover, .btn-next:hover {
+      background: rgba(41,182,246,0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-shuffle {
+      background: rgba(41,182,246,0.08);
+      color: var(--accent);
+      border-color: rgba(41,182,246,0.3);
+    }
+
+    .btn-shuffle:hover {
+      background: rgba(41,182,246,0.18);
+      border-color: var(--accent);
+    }
+
+    .btn-flip {
+      background: rgba(0,229,255,0.06);
+      color: var(--accent2);
+      border-color: rgba(0,229,255,0.2);
+    }
+
+    .btn-flip:hover {
+      background: rgba(0,229,255,0.14);
+      border-color: var(--accent2);
+    }
+
+    button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    button:disabled:hover {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    /* Keyboard hint */
+    .kb-hint {
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      opacity: 0.6;
+    }
+
+    .kb-hint kbd {
+      background: var(--tag);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 10px;
+    }
+
+    /* Card number badge */
+    .card-num {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Transition animation */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-anim {
+      animation: slideIn 0.3s ease;
+    }
+
+    @media (max-width: 480px) {
+      .card-container { height: 340px; }
+      .card-face { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div class="logo-row">
+      <svg class="snowflake-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <line x1="12" y1="2" x2="12" y2="22"/>
+        <line x1="2" y1="12" x2="22" y2="12"/>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+        <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/>
+        <circle cx="12" cy="2" r="1.5" fill="currentColor" stroke="none"/>
+        <circle cx="12" cy="22" r="1.5" fill="currentColor" stroke="none"/>
+        <circle cx="2" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+        <circle cx="22" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+        <circle cx="4.93" cy="4.93" r="1.5" fill="currentColor" stroke="none"/>
+        <circle cx="19.07" cy="19.07" r="1.5" fill="currentColor" stroke="none"/>
+        <circle cx="19.07" cy="4.93" r="1.5" fill="currentColor" stroke="none"/>
+        <circle cx="4.93" cy="19.07" r="1.5" fill="currentColor" stroke="none"/>
+      </svg>
+      <h1>Snow<span>Pro</span> Flashcards</h1>
+    </div>
+    <div class="subtitle">Associate: Platform Certification</div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">1 / 45</div>
+  </div>
+
+  <div class="category-row" id="categoryRow">
+    <div class="chip active" onclick="filterCategory('all', this)">All</div>
+    <div class="chip" onclick="filterCategory('Architecture', this)">Architecture</div>
+    <div class="chip" onclick="filterCategory('Access Control', this)">Access Control</div>
+    <div class="chip" onclick="filterCategory('Data Loading', this)">Data Loading</div>
+    <div class="chip" onclick="filterCategory('Warehouses', this)">Warehouses</div>
+    <div class="chip" onclick="filterCategory('Data Protection', this)">Data Protection</div>
+    <div class="chip" onclick="filterCategory('Cortex AI', this)">Cortex AI</div>
+    <div class="chip" onclick="filterCategory('Data Sharing', this)">Data Sharing</div>
+  </div>
+
+  <div class="card-container">
+    <div class="card" id="card" onclick="flipCard()">
+      <div class="card-face card-front">
+        <div class="card-tag" id="cardCategory">Architecture</div>
+        <span class="card-num" id="cardNum">01</span>
+        <div class="card-body">
+          <div class="card-text" id="frontText"></div>
+        </div>
+        <div class="card-hint"><div class="hint-dot"></div>tap to reveal answer</div>
+        <svg class="corner-deco" viewBox="0 0 48 48" fill="none" stroke="white" stroke-width="1.5">
+          <line x1="24" y1="0" x2="24" y2="48"/>
+          <line x1="0" y1="24" x2="48" y2="24"/>
+          <line x1="6.86" y1="6.86" x2="41.14" y2="41.14"/>
+          <line x1="41.14" y1="6.86" x2="6.86" y2="41.14"/>
+        </svg>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-tag">Answer</div>
+        <span class="card-num" id="cardNumBack">01</span>
+        <div class="card-body">
+          <div class="card-text" id="backText"></div>
+        </div>
+        <div class="card-hint"><div class="hint-dot" style="background:var(--accent2)"></div>tap to flip back</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-main">
+    <button class="btn-prev" onclick="prevCard()">← Previous</button>
+    <button class="btn-next" onclick="nextCard()">Next →</button>
+  </div>
+  <div class="controls-secondary">
+    <button class="btn-flip" onclick="flipCard()">⟳ Flip Card</button>
+    <button class="btn-shuffle" onclick="shuffleDeck()">⇄ Shuffle</button>
+  </div>
+
+  <div class="kb-hint">
+    <kbd>←</kbd> prev &nbsp;·&nbsp; <kbd>→</kbd> next &nbsp;·&nbsp; <kbd>Space</kbd> flip
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+  // Architecture
+  { q: "What is Snowflake?", a: "AI Data Cloud Platform. Cloud native SaaS that separates Compute from Storage. Runs on AWS, GCP, and Azure. Fully managed with pay-as-you-go pricing.", cat: "Architecture" },
+  { q: "What are the 3 layers of Snowflake architecture?", a: "1. Database Storage\n2. Query Processing Layer\n3. Cloud Services", cat: "Architecture" },
+  { q: "What is the Database Storage layer?", a: "Elastic storage decoupled from compute. Data stored in optimized, compressed, columnar format in cloud storage. Accessible to all nodes but not directly by users.", cat: "Architecture" },
+  { q: "What is the Query Processing layer?", a: "Uses Virtual Warehouses (MPP clusters) for query execution. Each VW has its own temp memory/cache. Warehouses are independent — no performance impact on each other.", cat: "Architecture" },
+  { q: "What does the Cloud Services layer do?", a: "Coordinates all platform activities: Authentication & Access Control, Infrastructure Manager, Query Optimizer, Metadata Manager, and Security (encryption, network isolation).", cat: "Architecture" },
+  { q: "What are the 4 Snowflake editions?", a: "Standard → Enterprise → Business Critical → VPS (Virtual Private Snowflake). Each adds features; Enterprise adds Multi-Cluster VW, Materialized Views, Extended Time Travel.", cat: "Architecture" },
+  { q: "What is Snowsight?", a: "Snowflake's web UI. Supports Worksheets (SQL/Python) and Notebooks. For each account you choose Edition, cloud provider, and Region.", cat: "Architecture" },
+  { q: "What is the Snowflake container hierarchy?", a: "Organization → Account → Database → Schema → Objects (Tables, Views, Stages, etc.)", cat: "Architecture" },
+  { q: "What are the 3 types of Snowflake Views?", a: "1. Non-Materialized View — virtual, no storage\n2. Materialized View — pre-computed, stored, faster (Enterprise+)\n3. Secure View — extra security layer (for either type)", cat: "Architecture" },
+  { q: "What are Snowflake Notebooks?", a: "Interactive environment requiring a Warehouse. Supports Python, SQL, Markdown. Supports cell-by-cell or full execution, Streamlit visualizations, variable substitution, and scheduling.", cat: "Architecture" },
+
+  // Access Control
+  { q: "What is DAC?", a: "Discretionary Access Control — each object has an owner who can grant access to that object.", cat: "Access Control" },
+  { q: "What is RBAC?", a: "Role-Based Access Control — access privileges are assigned to roles, which are in turn assigned to users.", cat: "Access Control" },
+  { q: "What are the 4 components of Snowflake access control?", a: "1. Securable Object — entity to which access can be granted\n2. Role — entity holding privileges\n3. Privilege — defined level of access\n4. User — identity recognized by Snowflake", cat: "Access Control" },
+  { q: "What does ORGADMIN do?", a: "Manages operations at organization level. Can create accounts, view all accounts in the org, and check usage info. Run: SHOW ORGANIZATION ACCOUNTS, SHOW REGIONS.", cat: "Access Control" },
+  { q: "What does ACCOUNTADMIN do?", a: "Top account-level role. Parent to SYSADMIN and SECURITYADMIN. Should be limited to few people.", cat: "Access Control" },
+  { q: "What does SECURITYADMIN do?", a: "Manages any grant globally. Creates/manages/monitors users and roles. Inherits USERADMIN privileges.", cat: "Access Control" },
+  { q: "What does SYSADMIN do?", a: "Creates warehouses, databases, and other objects. All custom roles should be assigned to SYSADMIN.", cat: "Access Control" },
+  { q: "What does USERADMIN do?", a: "Granted CREATE USER and CREATE ROLE privileges. Can create users and roles in the account.", cat: "Access Control" },
+  { q: "What is the PUBLIC role?", a: "Pseudo-role automatically granted to all users and roles. All users can access objects owned by PUBLIC. Used when explicit access control is not needed.", cat: "Access Control" },
+  { q: "What are Account Roles vs Database Roles?", a: "Account Roles: permit SQL actions on any object in the account.\nDatabase Roles: limit SQL actions to a single database only.", cat: "Access Control" },
+  { q: "What are Primary and Secondary Roles?", a: "Primary Role: the default assumed role (USE ROLE <name>).\nSecondary Role: any number can be assigned at once to extend privileges.", cat: "Access Control" },
+
+  // Data Loading
+  { q: "What is a Snowflake Stage?", a: "A named location of data files in cloud storage. Snowflake refers to these as stages. Used to load/unload data.", cat: "Data Loading" },
+  { q: "What are the types of internal stages?", a: "Table Stage (@%): auto-created per table, multi-user for 1 table.\nUser Stage (@~): auto-created per user, single user for multiple tables.\nNamed Stage (@): created by user, can be altered/dropped.", cat: "Data Loading" },
+  { q: "What is a Named External Stage?", a: "Created by user, refers to an object on cloud storage. Specifies a URL. Cannot point to archived data. Can be altered/dropped.", cat: "Data Loading" },
+  { q: "What semi-structured data formats can Snowflake LOAD?", a: "JSON, Avro, ORC, Parquet, XML", cat: "Data Loading" },
+  { q: "What semi-structured data formats can Snowflake UNLOAD?", a: "JSON and Parquet only", cat: "Data Loading" },
+  { q: "What are the 3 Snowflake semi-structured data types?", a: "ARRAY (max 16MB) — ordered list of same-type values\nOBJECT (max 16MB) — unordered key-value pairs\nVARIANT (max 16MB) — stores any semi-structured data (JSON, XML, etc.)", cat: "Data Loading" },
+  { q: "What are the 3 types of URLs for unstructured data access?", a: "Scoped URL: temporary, only the generating user, expires with query cache (24h).\nFile URL (BUILD_STAGE_FILE_URL): permanent, user with stage access.\nPre-signed URL (GET_PRESIGNED_URL): anyone with the URL, configurable expiry.", cat: "Data Loading" },
+  { q: "What are the 4 Snowflake table types?", a: "Permanent: until dropped, 7-day fail-safe, 0–90 day time travel.\nTransient: until dropped, 0-day fail-safe.\nTemporary: session only, 0-day fail-safe.\nExternal: read-only, points to external stage.", cat: "Data Loading" },
+  { q: "What is a Directory in Snowflake?", a: "An implicit object layered on a stage that stores file-level metadata. Can be enabled for internal/external stages. Data refreshed manually or auto (external only). No explicit privilege needed.", cat: "Data Loading" },
+
+  // Warehouses
+  { q: "What is a Virtual Warehouse?", a: "A cluster of compute resources (MPP) used to execute SQL queries and data loading. Decoupled from storage. Each has its own cache and is independent of others.", cat: "Warehouses" },
+  { q: "What is Scale Out (Multi-Cluster)?", a: "Adding more clusters to handle concurrent queries. Requires Enterprise Edition or higher. Soft limit of 10 max clusters. Can be automated.", cat: "Warehouses" },
+  { q: "What is Scale Up?", a: "Increasing the size of a single warehouse (e.g., Small → Medium → Large) to handle more complex queries.", cat: "Warehouses" },
+  { q: "What is the Standard Scaling Policy?", a: "Starts a cluster when a query is queued (waits 20s between each). Shuts down when load can redistribute — after 2–3 consecutive checks at 1-minute intervals.", cat: "Warehouses" },
+  { q: "What is the Economy Scaling Policy?", a: "Starts a cluster only when there's enough load to run for 6 minutes. Shuts down after 5–6 consecutive checks at 1-minute intervals. Conserves credits.", cat: "Warehouses" },
+  { q: "Standard vs Multi-Cluster Warehouse?", a: "Standard: single cluster, best for stable/predictable workloads.\nMulti-Cluster: multiple clusters, scales dynamically, best for high concurrency and variable workloads (Enterprise+).", cat: "Warehouses" },
+
+  // Data Protection
+  { q: "What is Snowflake Time Travel?", a: "Access historical data using AT/BEFORE with TIMESTAMP, OFFSET, or STATEMENT. Standard: 0–1 days. Enterprise+: 0–90 days. Supports SELECT, CREATE CLONE, and UNDROP.", cat: "Data Protection" },
+  { q: "What is Fail Safe?", a: "7-day period after Time Travel for permanent tables. No user operations allowed — only Snowflake staff can recover data. Transient/Temporary tables have 0-day Fail Safe.", cat: "Data Protection" },
+  { q: "What is Cloning in Snowflake?", a: "Creates an exact copy of a database, schema, or table. Zero-copy — uses metadata pointers to existing micro-partitions. Does NOT copy load metadata. Takes start time of job (in-between updates not cloned).", cat: "Data Protection" },
+  { q: "What objects CAN be cloned?", a: "Database, Schema, Tables, File Format, Sequence, Tags, Streams (unconsumed records remain). Cloning with Time Travel: only Database, Schema, Table & Streams.", cat: "Data Protection" },
+  { q: "What objects CANNOT be cloned?", a: "Users, Roles, Grants, Virtual Warehouses, Resource Monitors, Storage Integrations, Policies, External Stages, Table Stages, Temporary Tables, Views (individually).", cat: "Data Protection" },
+  { q: "When does Cloning fail?", a: "1. Source object in the past doesn't exist.\n2. Pipe object with AUTO_INGEST = TRUE is recreated.\n3. DATA_RETENTION_TIME_IN_DAYS = 0 (job may fail).", cat: "Data Protection" },
+
+  // Cortex AI
+  { q: "What is Snowflake Cortex?", a: "A suite of AI features using LLMs. Includes: Cortex LLM Functions, Snowflake Copilot, Document AI, Cortex Fine-tuning, Cortex Search, and Cortex Analyst.", cat: "Cortex AI" },
+  { q: "What are Cortex Task-Specific (AI SQL) functions?", a: "AI_COMPLETE() — general LLM completion.\nAI_CLASSIFY() — classify text into categories.\nAI_PARSE_DOCUMENT() — extract content from staged docs.\nTRANSLATE() — translate between languages.", cat: "Cortex AI" },
+  { q: "What are Cortex Helper functions?", a: "TO_FILE() — reference a staged file.\nPROMPT() — construct prompts.\nCOUNT_TOKENS() — count tokens.\nTRY_COMPLETE() — reduces failures from other LLM functions.", cat: "Cortex AI" },
+  { q: "What does AI_PARSE_DOCUMENT() support?", a: "Extracts content from staged documents. Supports OCR and LAYOUT modes. Limit: 100MB, 300 pages. Supported types: PDF, PPTX, DOCX. Stage must be server-side encrypted.", cat: "Cortex AI" },
+
+  // Data Sharing
+  { q: "What is the Snowflake Marketplace?", a: "Provides a wide variety of data, apps, and services. Native to Snowflake. Lots of free and freemium offerings. NOT available for VPS (Virtual Private Snowflake).", cat: "Data Sharing" },
+  { q: "What is a Data Exchange?", a: "Enables data sharing between an invited group of entities. Must contact Snowflake Support to enable it. Can share within your org or with external partners. NOT available for VPS.", cat: "Data Sharing" },
+];
+
+let deck = [...ALL_CARDS];
+let currentIndex = 0;
+let isFlipped = false;
+let activeCategory = 'all';
+
+function filterCategory(cat, el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeCategory = cat;
+  deck = cat === 'all' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.cat === cat);
+  currentIndex = 0;
+  updateCard(true);
+}
+
+function updateCard(animate = false) {
+  const card = document.getElementById('card');
+  if (isFlipped) {
+    card.classList.remove('flipped');
+    isFlipped = false;
+  }
+
+  const current = deck[currentIndex];
+  const num = String(currentIndex + 1).padStart(2, '0');
+
+  // Small delay to let flip reset
+  setTimeout(() => {
+    document.getElementById('cardCategory').textContent = current.cat;
+    document.getElementById('frontText').textContent = current.q;
+    document.getElementById('backText').textContent = current.a;
+    document.getElementById('cardNum').textContent = num;
+    document.getElementById('cardNumBack').textContent = num;
+
+    if (animate) {
+      card.classList.add('card-anim');
+      setTimeout(() => card.classList.remove('card-anim'), 300);
+    }
+  }, isFlipped ? 300 : 0);
+
+  const pct = ((currentIndex + 1) / deck.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${currentIndex + 1} / ${deck.length}`;
+}
+
+function flipCard() {
+  const card = document.getElementById('card');
+  card.classList.toggle('flipped');
+  isFlipped = !isFlipped;
+}
+
+function nextCard() {
+  if (currentIndex < deck.length - 1) {
+    currentIndex++;
+    updateCard(true);
+  }
+}
+
+function prevCard() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    updateCard(true);
+  }
+}
+
+function shuffleDeck() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  currentIndex = 0;
+  updateCard(true);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') prevCard();
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === ' ') { e.preventDefault(); flipCard(); }
+});
+
+updateCard();
+</script>
+</body>
+</html>
