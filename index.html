@@ -1,431 +1,478 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SnowPro Platform Flashcards</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #050d1a;
-      --surface: #0a1628;
-      --card-front: #0d1e35;
-      --card-back: #061223;
-      --border: rgba(41, 182, 246, 0.18);
-      --accent: #29b6f6;
-      --accent2: #00e5ff;
-      --text: #e8f4fd;
-      --muted: #6b9ab8;
-      --tag: #112240;
-      --green: #00e676;
-      --orange: #ff9800;
-      --red: #ef5350;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SnowPro Platform — Exam Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#050d1a; --surface:#0a1628; --card:#0d1e35; --border:rgba(41,182,246,.18);
+  --accent:#29b6f6; --accent2:#00e5ff; --text:#e8f4fd; --muted:#6b9ab8; --tag:#112240;
+  --green:#00c853; --red:#ef5350; --orange:#ff9800; --yellow:#ffd740;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Syne',sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 14px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(41,182,246,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(41,182,246,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+#app{max-width:620px;width:100%;position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+/* Header */
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.logo{display:flex;align-items:center;gap:9px;}
+.sf-icon{width:26px;height:26px;color:var(--accent);}
+h1{font-size:19px;font-weight:800;color:var(--text);}
+h1 span{color:var(--accent);}
+.score-pill{font-family:'DM Mono',monospace;font-size:12px;background:var(--tag);border:1px solid var(--border);border-radius:8px;padding:5px 12px;color:var(--muted);white-space:nowrap;}
+.score-pill em{color:var(--accent);font-style:normal;font-weight:700;}
 
-    body {
-      font-family: 'Syne', sans-serif;
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px;
-      overflow-x: hidden;
-    }
+/* Progress */
+.prog-row{display:flex;align-items:center;gap:10px;}
+.prog-bg{flex:1;height:3px;background:var(--border);border-radius:99px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .4s ease;}
+.prog-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;}
 
-    /* Animated grid background */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(41,182,246,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(41,182,246,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-    }
+/* Category chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);color:var(--muted);background:var(--tag);cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.chip.on{background:rgba(41,182,246,.15);border-color:var(--accent);color:var(--accent);}
+.chip:hover:not(.on){border-color:rgba(41,182,246,.4);color:var(--text);}
 
-    body::after {
-      content: '';
-      position: fixed;
-      top: -30%;
-      left: -10%;
-      width: 60vw;
-      height: 60vw;
-      background: radial-gradient(circle, rgba(41,182,246,0.06) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+/* Question card */
+.qcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 24px;position:relative;overflow:hidden;}
+.qcard::before{content:'';position:absolute;top:-1px;left:-1px;right:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.6;}
+.qcard-top{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.type-badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:5px;font-weight:500;}
+.t-mc{background:rgba(41,182,246,.1);color:var(--accent);border:1px solid rgba(41,182,246,.3);}
+.t-ms{background:rgba(255,152,0,.1);color:var(--orange);border:1px solid rgba(255,152,0,.3);}
+.t-ix{background:rgba(0,229,255,.07);color:var(--accent2);border:1px solid rgba(0,229,255,.25);}
+.cat-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.qnum{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.qtext{font-size:16px;font-weight:600;color:var(--text);line-height:1.55;margin-bottom:22px;}
 
-    .container {
-      max-width: 560px;
-      width: 100%;
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+/* Options (MC/MS) */
+.opts{display:flex;flex-direction:column;gap:9px;}
+.opt{display:flex;align-items:flex-start;gap:11px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;transition:all .18s;text-align:left;width:100%;}
+.opt:hover:not(.done){border-color:rgba(41,182,246,.4);background:rgba(41,182,246,.06);}
+.opt.sel{border-color:var(--accent);background:rgba(41,182,246,.11);}
+.opt.ok{border-color:var(--green)!important;background:rgba(0,200,83,.1)!important;}
+.opt.bad{border-color:var(--red)!important;background:rgba(239,83,80,.1)!important;}
+.opt.reveal{border-color:var(--green)!important;background:rgba(0,200,83,.06)!important;}
+.opt.done{cursor:default;}
+.opt-key{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:var(--muted);min-width:18px;padding-top:1px;}
+.opt.sel .opt-key{color:var(--accent);}
+.opt.ok .opt-key,.opt.reveal .opt-key{color:var(--green);}
+.opt.bad .opt-key{color:var(--red);}
+.opt-txt{font-size:14px;color:var(--text);line-height:1.45;flex:1;}
+.opt-ico{margin-left:auto;font-size:15px;padding-top:1px;}
+.chk{width:15px;height:15px;border:2px solid var(--muted);border-radius:4px;min-width:15px;margin-top:2px;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.opt.sel .chk{border-color:var(--accent);background:var(--accent);color:#000;}
+.opt.ok .chk{border-color:var(--green);background:var(--green);color:#000;}
+.opt.bad .chk{border-color:var(--red);background:var(--red);color:#fff;}
+.opt.reveal .chk{border-color:var(--green);background:rgba(0,200,83,.3);}
 
-    /* Header */
-    header {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+/* Match */
+.match-wrap{display:flex;flex-direction:column;gap:9px;}
+.match-row{display:flex;align-items:center;gap:10px;}
+.match-lbl{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);font-weight:500;min-width:120px;padding:9px 11px;background:rgba(41,182,246,.07);border:1px solid rgba(41,182,246,.2);border-radius:8px;flex-shrink:0;}
+.match-sel{flex:1;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 30px 9px 11px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b9ab8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;cursor:pointer;transition:border-color .2s;}
+.match-sel:focus{outline:none;border-color:var(--accent);}
+.match-sel.ok{border-color:var(--green)!important;background-color:rgba(0,200,83,.07);}
+.match-sel.bad{border-color:var(--red)!important;background-color:rgba(239,83,80,.07);}
+.match-sel:disabled{cursor:default;opacity:.8;}
 
-    .logo-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+/* Order */
+.ord-hint{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:12px;letter-spacing:.4px;}
+.ord-pool{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border:1px dashed rgba(41,182,246,.15);border-radius:10px;min-height:46px;background:rgba(41,182,246,.02);margin-bottom:14px;}
+.ord-chip{font-family:'DM Mono',monospace;font-size:12px;padding:7px 13px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;transition:all .18s;user-select:none;display:flex;align-items:center;gap:7px;}
+.ord-chip:hover:not(.placed):not(.done){border-color:var(--accent);background:rgba(41,182,246,.1);}
+.ord-chip.placed{border-color:var(--accent);background:rgba(41,182,246,.1);cursor:pointer;}
+.ord-chip.done{cursor:default;}
+.ord-chip.ok{border-color:var(--green)!important;background:rgba(0,200,83,.1)!important;color:var(--green);}
+.ord-chip.bad{border-color:var(--red)!important;background:rgba(239,83,80,.1)!important;color:var(--red);}
+.ord-num{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;background:var(--accent);color:#000;border-radius:50%;font-size:9px;font-weight:800;flex-shrink:0;}
+.ord-seq{display:flex;flex-direction:column;gap:6px;}
+.ord-slot{display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);min-height:38px;}
+.slot-n{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);min-width:16px;}
+.slot-txt{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);}
 
-    .snowflake-icon {
-      width: 32px;
-      height: 32px;
-      color: var(--accent);
-    }
+/* Categorize */
+.cat-pool{display:flex;flex-wrap:wrap;gap:7px;padding:10px;border:1px dashed rgba(41,182,246,.15);border-radius:10px;min-height:46px;background:rgba(41,182,246,.02);margin-bottom:14px;}
+.cat-chip{font-family:'DM Mono',monospace;font-size:12px;padding:7px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer;transition:all .18s;user-select:none;}
+.cat-chip:hover:not(.done){border-color:var(--accent);}
+.cat-chip.sel-chip{border-color:var(--orange);background:rgba(255,152,0,.1);color:var(--orange);}
+.cat-chip.gone{opacity:.35;cursor:default;}
+.cat-chip.done{cursor:default;}
+.cat-buckets{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bucket{border:1px solid var(--border);border-radius:10px;padding:12px;min-height:70px;cursor:pointer;transition:all .2s;}
+.bucket:hover:not(.done){border-color:var(--accent);background:rgba(41,182,246,.04);}
+.bucket.hot{border-color:var(--orange);background:rgba(255,152,0,.05);}
+.bucket.done{cursor:default;}
+.bkt-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.bkt-items{display:flex;flex-wrap:wrap;gap:5px;}
+.bkt-item{font-family:'DM Mono',monospace;font-size:11px;padding:4px 8px;border-radius:5px;background:rgba(41,182,246,.1);border:1px solid rgba(41,182,246,.2);color:var(--accent);}
+.bkt-item.ok{background:rgba(0,200,83,.1);border-color:rgba(0,200,83,.3);color:var(--green);}
+.bkt-item.bad{background:rgba(239,83,80,.1);border-color:rgba(239,83,80,.3);color:var(--red);}
 
-    h1 {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: -0.5px;
-    }
+/* Feedback */
+.feedback{margin-top:18px;padding:13px 15px;border-radius:10px;font-size:14px;line-height:1.55;}
+.feedback.ok{background:rgba(0,200,83,.07);border:1px solid rgba(0,200,83,.22);color:#a5d6a7;}
+.feedback.bad{background:rgba(239,83,80,.07);border:1px solid rgba(239,83,80,.22);color:#ef9a9a;}
+.fb-lbl{font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.feedback.ok .fb-lbl{color:var(--green);}
+.feedback.bad .fb-lbl{color:var(--red);}
 
-    h1 span {
-      color: var(--accent);
-    }
+/* Buttons */
+.btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.btn{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;border-radius:10px;padding:11px 14px;border:1px solid var(--border);cursor:pointer;transition:all .2s;background:var(--surface);color:var(--text);}
+.btn:hover:not(:disabled){border-color:rgba(41,182,246,.4);background:rgba(41,182,246,.08);color:var(--accent);}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-submit{grid-column:1/-1;background:rgba(41,182,246,.09);border-color:rgba(41,182,246,.3);color:var(--accent);font-size:14px;}
+.btn-submit:hover:not(:disabled){background:rgba(41,182,246,.18);border-color:var(--accent);color:var(--accent);}
+.btn-next{grid-column:1/-1;background:rgba(0,200,83,.07);border-color:rgba(0,200,83,.28);color:var(--green);}
+.btn-next:hover:not(:disabled){background:rgba(0,200,83,.14);border-color:var(--green);}
+.btn-shuf{background:rgba(255,152,0,.07);border-color:rgba(255,152,0,.22);color:var(--orange);}
+.btn-shuf:hover:not(:disabled){background:rgba(255,152,0,.14);border-color:var(--orange);color:var(--orange);}
 
-    .subtitle {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
+/* End screen */
+.end{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 28px;text-align:center;}
+.end-pct{font-size:68px;font-weight:800;color:var(--accent);line-height:1;}
+.end-frac{font-family:'DM Mono',monospace;color:var(--muted);margin:8px 0 20px;}
+.end-msg{font-size:15px;color:var(--text);margin-bottom:24px;line-height:1.5;}
+.end-bar{display:flex;gap:6px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
+.end-dot{width:10px;height:10px;border-radius:50%;}
 
-    /* Progress bar */
-    .progress-wrap {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+/* Kb hint */
+.kb{text-align:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);opacity:.5;}
+.kb kbd{background:var(--tag);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px;}
 
-    .progress-bar-bg {
-      flex: 1;
-      height: 3px;
-      background: var(--border);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 99px;
-      transition: width 0.4s ease;
-    }
-
-    .progress-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    /* Category chips */
-    .category-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .chip {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 1px;
-      padding: 4px 10px;
-      border-radius: 99px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      background: var(--tag);
-      cursor: pointer;
-      transition: all 0.2s;
-      text-transform: uppercase;
-    }
-
-    .chip.active {
-      background: rgba(41,182,246,0.15);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .chip:hover:not(.active) {
-      border-color: rgba(41,182,246,0.4);
-      color: var(--text);
-    }
-
-    /* Card */
-    .card-container {
-      perspective: 1200px;
-      height: 380px;
-    }
-
-    .card {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
-      cursor: pointer;
-    }
-
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
-
-    .card-face {
-      position: absolute;
-      inset: 0;
-      backface-visibility: hidden;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 32px;
-      overflow: hidden;
-    }
-
-    /* Glow effect on card */
-    .card-face::before {
-      content: '';
-      position: absolute;
-      top: -1px; left: -1px; right: -1px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0.6;
-      border-radius: 16px 16px 0 0;
-    }
-
-    .card-front {
-      background: var(--card-front);
-    }
-
-    .card-back {
-      background: var(--card-back);
-      transform: rotateY(180deg);
-    }
-
-    .card-back::before {
-      background: linear-gradient(90deg, transparent, var(--accent2), transparent);
-    }
-
-    .card-tag {
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: rgba(41,182,246,0.1);
-      border: 1px solid rgba(41,182,246,0.2);
-      border-radius: 6px;
-      padding: 4px 10px;
-      align-self: flex-start;
-      margin-bottom: 20px;
-    }
-
-    .card-back .card-tag {
-      color: var(--accent2);
-      background: rgba(0,229,255,0.08);
-      border-color: rgba(0,229,255,0.2);
-    }
-
-    .card-body {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-text {
-      font-size: clamp(16px, 4vw, 22px);
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.45;
-      text-align: center;
-    }
-
-    .card-back .card-text {
-      font-size: clamp(14px, 3.5vw, 18px);
-      font-weight: 400;
-      color: #b8d4e8;
-      font-family: 'DM Mono', monospace;
-      line-height: 1.7;
-      text-align: left;
-    }
-
-    .card-hint {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-      justify-content: center;
-      margin-top: 16px;
-    }
-
-    .hint-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.3); }
-    }
-
-    /* Corner decoration */
-    .corner-deco {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      width: 48px;
-      height: 48px;
-      opacity: 0.07;
-    }
-
-    /* Controls */
-    .controls-main {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .controls-secondary {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    button {
-      font-family: 'Syne', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 13px 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-prev, .btn-next {
-      background: var(--surface);
-      color: var(--text);
-    }
-
-    .btn-prev:hover, .btn-next:hover {
-      background: rgba(41,182,246,0.12);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .btn-shuffle {
-      background: rgba(41,182,246,0.08);
-      color: var(--accent);
-      border-color: rgba(41,182,246,0.3);
-    }
-
-    .btn-shuffle:hover {
-      background: rgba(41,182,246,0.18);
-      border-color: var(--accent);
-    }
-
-    .btn-flip {
-      background: rgba(0,229,255,0.06);
-      color: var(--accent2);
-      border-color: rgba(0,229,255,0.2);
-    }
-
-    .btn-flip:hover {
-      background: rgba(0,229,255,0.14);
-      border-color: var(--accent2);
-    }
-
-    button:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    button:disabled:hover {
-      background: var(--surface);
-      border-color: var(--border);
-      color: var(--text);
-    }
-
-    /* Keyboard hint */
-    .kb-hint {
-      text-align: center;
-      font-family: 'DM Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      opacity: 0.6;
-    }
-
-    .kb-hint kbd {
-      background: var(--tag);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-size: 10px;
-    }
-
-    /* Card number badge */
-    .card-num {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* Transition animation */
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .card-anim {
-      animation: slideIn 0.3s ease;
-    }
-
-    @media (max-width: 480px) {
-      .card-container { height: 340px; }
-      .card-face { padding: 24px 20px; }
-    }
-  </style>
+@media(max-width:480px){
+  .qcard{padding:18px 14px;}
+  .match-lbl{min-width:90px;font-size:11px;}
+  .cat-buckets{grid-template-columns:1fr;}
+  .btns{grid-template-columns:1fr 1fr;}
+  .btn-submit,.btn-next{grid-column:1/-1;}
+}
+</style>
 </head>
 <body>
-<div class="container">
-  <header>
-    <div class="logo-row">
-      <svg class="snowflake-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <line x1="12" y1="2" x2="12" y2="22"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
-        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-        <line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/>
+<div id="app"></div>
+<script>
+// ─── QUESTION DATA ───────────────────────────────────────────────────────────
+const QS = [
+  // ARCHITECTURE
+  {id:1,cat:'Architecture',type:'mc',
+   q:'What is Snowflake\'s core architectural innovation?',
+   opts:['Built on traditional database technology with cloud hosting','Separates compute from storage, enabling each to scale independently','Combines all three layers into a single unified architecture','Uses on-premise infrastructure with cloud redundancy'],
+   ans:1,
+   exp:'Snowflake\'s key innovation is complete separation of compute (Virtual Warehouses) from storage. Each can scale independently — you can scale compute for complex queries without paying for more storage, and vice versa.'},
+  {id:2,cat:'Architecture',type:'mc',
+   q:'Which Snowflake layer is responsible for query optimization and metadata management?',
+   opts:['Database Storage layer','Query Processing layer','Cloud Services layer','Virtual Warehouse layer'],
+   ans:2,
+   exp:'The Cloud Services layer coordinates all platform activity: Query Optimizer, Metadata Manager, Authentication & Access Control, Infrastructure Manager, and Security. The Query Processing layer executes queries — but optimization happens in Cloud Services.'},
+  {id:3,cat:'Architecture',type:'ms',
+   q:'Which of the following are components of the Cloud Services layer? (Select ALL that apply)',
+   opts:['Infrastructure Manager','Virtual Warehouse (MPP cluster)','Metadata Manager','Query Optimizer','Authentication & Access Control'],
+   ans:[0,2,3,4],
+   exp:'Cloud Services includes: Infrastructure Manager, Metadata Manager, Query Optimizer, Authentication & Access Control, and Security. Virtual Warehouses belong to the Query Processing layer, not Cloud Services.'},
+  {id:4,cat:'Architecture',type:'ms',
+   q:'Which of the following correctly describe Virtual Warehouses? (Select ALL that apply)',
+   opts:['Each has its own temporary memory and cache','Warehouses share compute resources with each other','Each operates independently with no impact on others','Can be auto-suspended after inactivity','Can be auto-resumed when new queries arrive'],
+   ans:[0,2,3,4],
+   exp:'VWs are independent MPP compute clusters with their own cache. They do NOT share compute — that independence is a key feature. They can auto-suspend and auto-resume.'},
+  {id:5,cat:'Architecture',type:'mc',
+   q:'Which Snowflake edition is the MINIMUM required to use Multi-Cluster Virtual Warehouses?',
+   opts:['Standard','Enterprise','Business Critical','VPS'],
+   ans:1,
+   exp:'Multi-Cluster Warehouses (Scale Out) require Enterprise Edition or higher. Standard Edition only supports single-cluster warehouses.'},
+  {id:6,cat:'Architecture',type:'order',
+   q:'Place these container hierarchy levels in order from SMALLEST to LARGEST scope:',
+   items:['Table','Schema','Database','Account','Organization'],
+   exp:'Hierarchy (smallest → largest): Table → Schema → Database → Account → Organization. Tables live within Schemas, Schemas within Databases, Databases within Accounts, and Accounts within an Organization.'},
+  {id:7,cat:'Architecture',type:'match',
+   q:'Match each Snowflake edition to its distinguishing feature:',
+   pairs:[
+     {l:'Standard',r:'Base features; Time Travel 0–1 day only'},
+     {l:'Enterprise',r:'Multi-Cluster VW; Extended Time Travel up to 90 days'},
+     {l:'Business Critical',r:'Failover/DR; HIPAA compliance; highest security'},
+     {l:'VPS',r:'Completely separate isolated Snowflake environment'}
+   ],
+   exp:'Each edition builds on the previous. Enterprise adds Multi-Cluster VW and extended Time Travel. Business Critical adds failover, DR, and compliance features. VPS gives complete isolation.'},
+  {id:8,cat:'Architecture',type:'mc',
+   q:'What is a Materialized View in Snowflake?',
+   opts:['A virtual view with no data storage, computed at query time','A pre-computed, stored view automatically maintained by Snowflake','A temporary view lasting the duration of a session','A secure view that hides query logic from users'],
+   ans:1,
+   exp:'Materialized Views are pre-computed and stored — Snowflake automatically maintains them. They offer faster query performance but incur extra storage/compute costs. They are an Enterprise+ feature.'},
+
+  // ACCESS CONTROL
+  {id:9,cat:'Access Control',type:'mc',
+   q:'Which Snowflake role is automatically granted to ALL users and ALL roles?',
+   opts:['SYSADMIN','USERADMIN','PUBLIC','ACCOUNTADMIN'],
+   ans:2,
+   exp:'PUBLIC is a pseudo-role automatically granted to every user and role. Objects owned by PUBLIC are accessible to everyone. It\'s used when explicit access control is not needed.'},
+  {id:10,cat:'Access Control',type:'mc',
+   q:'Which role can run SHOW ORGANIZATION ACCOUNTS and create new Snowflake accounts?',
+   opts:['ACCOUNTADMIN','SYSADMIN','ORGADMIN','SECURITYADMIN'],
+   ans:2,
+   exp:'ORGADMIN manages operations at the organization level. It can create accounts, view all accounts and enabled regions, and check usage across the organization.'},
+  {id:11,cat:'Access Control',type:'mc',
+   q:'Beyond granting SELECT on a table, what additional grants are REQUIRED for a role to access it?',
+   opts:['No additional grants needed','USAGE privilege on the Database AND the Schema','OWNERSHIP privilege on the table','CONTROL privilege on the Schema'],
+   ans:1,
+   exp:'In Snowflake you need USAGE on both the Database and the Schema to navigate to a table. Without these, even with SELECT on the table itself, the role cannot access it.'},
+  {id:12,cat:'Access Control',type:'mc',
+   q:'What access control framework does Snowflake use?',
+   opts:['Mandatory Access Control (MAC) only','Role-Based Access Control (RBAC) only','Discretionary Access Control (DAC) only','A combination of DAC and RBAC'],
+   ans:3,
+   exp:'Snowflake uses both DAC (object owners can grant access to their objects) and RBAC (privileges assigned to roles, roles assigned to users). They work together.'},
+  {id:13,cat:'Access Control',type:'match',
+   q:'Match each system-defined role to its primary capability:',
+   pairs:[
+     {l:'ORGADMIN',r:'Create & manage accounts across the organization'},
+     {l:'SYSADMIN',r:'Create databases and warehouses; home for custom roles'},
+     {l:'SECURITYADMIN',r:'Manage any grant globally; parent of USERADMIN'},
+     {l:'USERADMIN',r:'Granted CREATE USER and CREATE ROLE privileges'}
+   ],
+   exp:'ORGADMIN is org-wide. ACCOUNTADMIN is top-level account admin. SECURITYADMIN handles grants and user/role management globally. SYSADMIN creates data objects. USERADMIN creates users and roles.'},
+  {id:14,cat:'Access Control',type:'ms',
+   q:'Which statements about Snowflake\'s access control model are TRUE? (Select ALL that apply)',
+   opts:['Each object has an owner who can grant access to that object (DAC)','Roles can be granted to other roles, creating a role hierarchy','Users are directly granted privileges without using roles','USAGE on a Database alone is sufficient to query tables within it','Privileges are granted to roles, and roles are granted to users (RBAC)'],
+   ans:[0,1,4],
+   exp:'DAC: each object has an owner. RBAC: privileges → roles → users. Roles can form hierarchies. Users do NOT get privileges directly — they get roles. And USAGE on Database alone is insufficient — you also need USAGE on the Schema.'},
+
+  // DATA LOADING
+  {id:15,cat:'Data Loading',type:'mc',
+   q:'Which command uploads local data files to an internal Snowflake stage?',
+   opts:['COPY','PUT','LOAD','INSERT'],
+   ans:1,
+   exp:'PUT uploads files from a local filesystem to an internal Snowflake stage. COPY INTO then loads data from the stage into a table. These are two separate steps.'},
+  {id:16,cat:'Data Loading',type:'mc',
+   q:'Which command loads data FROM a stage INTO a Snowflake table?',
+   opts:['INSERT FROM STAGE','PUT INTO TABLE','COPY INTO','LOAD DATA INFILE'],
+   ans:2,
+   exp:'COPY INTO is the bulk-loading command. Example: COPY INTO customer_table FROM @la_stage FILE_FORMAT = my_csv_ff; It can also use PURGE=TRUE to clean up stage files after loading.'},
+  {id:17,cat:'Data Loading',type:'mc',
+   q:'Which stage symbol is used to reference a USER STAGE in Snowflake?',
+   opts:['@','@%','@~','@#'],
+   ans:2,
+   exp:'Stage symbols: @% = Table Stage (per-table), @~ = User Stage (per-user), @ = Named Stage (user-created). For example, "list @~;" lists files in your personal user stage.'},
+  {id:18,cat:'Data Loading',type:'mc',
+   q:'What does PURGE = TRUE do in a COPY INTO statement?',
+   opts:['Drops the target table after loading','Deletes the source files from the stage after successful loading','Removes duplicate rows from the loaded data','Clears the query result cache'],
+   ans:1,
+   exp:'PURGE=TRUE automatically deletes files from the stage after successful loading. This keeps stages clean and prevents accidentally reloading the same data files.'},
+  {id:19,cat:'Data Loading',type:'mc',
+   q:'What is the maximum size for a VARIANT, ARRAY, or OBJECT column in Snowflake?',
+   opts:['1MB','8MB','16MB','64MB'],
+   ans:2,
+   exp:'All three semi-structured types (VARIANT, ARRAY, OBJECT) have a maximum value size of 16MB. VARIANT is the most flexible — it can store any type including nested JSON, XML, Avro structures, etc.'},
+  {id:20,cat:'Data Loading',type:'mc',
+   q:'Which URL type can be accessed by ANYONE who has the URL, with no role-based checks?',
+   opts:['Scoped URL','File URL (BUILD_STAGE_FILE_URL)','Pre-signed URL (GET_PRESIGNED_URL)','Internal URL'],
+   ans:2,
+   exp:'Pre-signed URLs embed a pre-signed access token, so anyone with the URL can access the file. Scoped URLs are limited to the generating user (24-hour cache). File URLs require the role to have stage privileges.'},
+  {id:21,cat:'Data Loading',type:'ms',
+   q:'Which file formats can be LOADED into Snowflake as semi-structured data? (Select ALL that apply)',
+   opts:['JSON','Avro','ORC','Parquet','XML','CSV'],
+   ans:[0,1,2,3,4],
+   exp:'5 semi-structured load formats: JSON, Avro, ORC, Parquet, XML. CSV is structured data. For UNLOADING, only JSON and Parquet are supported — remember this distinction!'},
+  {id:22,cat:'Data Loading',type:'ms',
+   q:'Which of the following are TRUE about Named Stages? (Select ALL that apply)',
+   opts:['Auto-created for each user in the system','Created explicitly by a user or admin','Can be altered and dropped like any other object','Can reference external cloud storage with a URL','Can only be used by a single user at a time'],
+   ans:[1,2,3],
+   exp:'Named Stages are user-created, can be modified/dropped, and can reference external cloud storage. Table and User Stages are auto-created. Named Stages can be shared across multiple users.'},
+  {id:23,cat:'Data Loading',type:'match',
+   q:'Match each stage type to its symbol and creation rule:',
+   pairs:[
+     {l:'Table Stage',r:'@% — auto-created per table, multi-user for 1 table'},
+     {l:'User Stage',r:'@~ — auto-created per user, single user only'},
+     {l:'Named Stage',r:'@ — user-created, can be altered/dropped'},
+     {l:'External Stage',r:'User-created, references external cloud URL'}
+   ],
+   exp:'Three internal stage types have distinct symbols. Table Stage (@%) auto-created per table. User Stage (@~) auto-created per user. Named Stage (@) is user-created and the most flexible. External stages point outside Snowflake.'},
+
+  // WAREHOUSES
+  {id:24,cat:'Warehouses',type:'mc',
+   q:'In the Economy scaling policy, a new cluster only starts when there is enough load to keep it busy for how long?',
+   opts:['1 minute','3 minutes','6 minutes','10 minutes'],
+   ans:2,
+   exp:'Economy policy: a cluster starts only when there\'s enough load to run for at least 6 minutes. This conserves credits but may increase queue times. Standard policy starts a cluster as soon as a query is queued.'},
+  {id:25,cat:'Warehouses',type:'mc',
+   q:'In the Standard scaling policy, how long does each successive new cluster wait before starting?',
+   opts:['5 seconds','10 seconds','20 seconds','60 seconds'],
+   ans:2,
+   exp:'Standard policy: starts a cluster when a query is queued. Each successive cluster waits 20 seconds after the prior one started. Shutdown occurs when load can be redistributed — after 2-3 checks at 1-minute intervals.'},
+  {id:26,cat:'Warehouses',type:'mc',
+   q:'What is the SOFT limit on the maximum number of clusters in a Multi-Cluster Warehouse?',
+   opts:['5','10','20','50'],
+   ans:1,
+   exp:'Multi-Cluster Warehouses have a soft limit of 10 maximum clusters. Both Max and Min Clusters can be set up to 10. This limit may be increased by contacting Snowflake support.'},
+  {id:27,cat:'Warehouses',type:'ms',
+   q:'Which of the following are TRUE about Scale Out in Snowflake? (Select ALL that apply)',
+   opts:['Requires Enterprise Edition or higher','Used to handle high numbers of concurrent queries','Soft limit of 10 maximum clusters','Increases the size of a single virtual warehouse','Can be fully automated based on query load'],
+   ans:[0,1,2,4],
+   exp:'Scale Out (Multi-Cluster) is an Enterprise+ feature that adds clusters for concurrency, has a soft limit of 10, and can be automated. Option D describes Scale UP — increasing a single warehouse\'s size.'},
+  {id:28,cat:'Warehouses',type:'order',
+   q:'Order the Standard scaling policy events from FIRST to LAST:',
+   items:['Query is queued','First cluster starts immediately','Next cluster waits 20 sec then starts','Load redistributes; cluster shuts after 2–3 checks'],
+   exp:'Standard scaling: 1) Query queued → 2) First cluster starts → 3) Next cluster waits 20s → 4) When load is light enough to redistribute, clusters shut (after 2-3 checks, 1-min intervals).'},
+
+  // DATA PROTECTION
+  {id:29,cat:'Data Protection',type:'mc',
+   q:'What is the Fail Safe retention period for Permanent tables?',
+   opts:['0 days','1 day','7 days','90 days'],
+   ans:2,
+   exp:'Permanent tables have a 7-day Fail Safe period after Time Travel expires. During Fail Safe, NO user operations are allowed — only Snowflake staff can recover data. Transient and Temporary tables have 0-day Fail Safe.'},
+  {id:30,cat:'Data Protection',type:'mc',
+   q:'What is the DEFAULT Time Travel retention for Standard Edition permanent objects?',
+   opts:['0 days','1 day','7 days','30 days'],
+   ans:1,
+   exp:'Standard Edition: default 1 day, configurable 0–1 day. Enterprise+: configurable 0–90 days for permanent objects. The parameter is DATA_RETENTION_TIME_IN_DAYS.'},
+  {id:31,cat:'Data Protection',type:'mc',
+   q:'Which SQL command restores a previously dropped Snowflake object?',
+   opts:['RESTORE TABLE','RECOVER TABLE','UNDROP TABLE','REVERT TABLE'],
+   ans:2,
+   exp:'UNDROP TABLE / SCHEMA / DATABASE restores the object as it was before being dropped. It must be run within the Time Travel retention window. After that window closes, the data is unrecoverable by users.'},
+  {id:32,cat:'Data Protection',type:'mc',
+   q:'Cloning with Time Travel (AT/BEFORE) is supported for which object types?',
+   opts:['All clonable objects','Tables only','Database, Schema, Table, and Streams','Database and Schema only'],
+   ans:2,
+   exp:'While many objects can be cloned at the current time, Time Travel cloning (specifying a past point) only works for Database, Schema, Table, and Streams.'},
+  {id:33,cat:'Data Protection',type:'ms',
+   q:'Which parameters can be used with the AT/BEFORE clause in a Time Travel query? (Select ALL that apply)',
+   opts:['TIMESTAMP','OFFSET','STATEMENT','ROWCOUNT','VERSION'],
+   ans:[0,1,2],
+   exp:'Three AT/BEFORE options: TIMESTAMP (specific datetime), OFFSET (seconds in the past, e.g. OFFSET => -150), and STATEMENT (query ID). ROWCOUNT and VERSION are not valid Time Travel parameters.'},
+  {id:34,cat:'Data Protection',type:'ms',
+   q:'Which of the following objects CANNOT be cloned in Snowflake? (Select ALL that apply)',
+   opts:['Tables','Users','Virtual Warehouses','Grants','Schemas','Resource Monitors'],
+   ans:[1,2,3,5],
+   exp:'Cannot be cloned: Users, Roles, Grants, Virtual Warehouses, Resource Monitors, Storage Integrations, Policies, External Stages, Table Stages, Temporary Tables, Views (individually). Tables and Schemas CAN be cloned.'},
+  {id:35,cat:'Data Protection',type:'order',
+   q:'Order the Continuous Data Protection lifecycle stages from FIRST to LAST:',
+   items:['Current Data Storage (all standard operations)','Time Travel Retention (AT/BEFORE; UNDROP available)','Fail Safe (Snowflake staff only; no user operations)'],
+   exp:'CDP lifecycle: Current Storage → Time Travel (access/restore historical data) → Fail Safe (recovery by Snowflake only, 7 days for Permanent tables) → data is gone.'},
+  {id:36,cat:'Data Protection',type:'match',
+   q:'Match each table type to its Fail Safe period:',
+   pairs:[
+     {l:'Permanent Table',r:'7 days (fixed, no user access)'},
+     {l:'Transient Table',r:'0 days (no Fail Safe)'},
+     {l:'Temporary Table',r:'0 days (session-scoped)'},
+     {l:'External Table',r:'Not applicable (read-only, external data)'}
+   ],
+   exp:'Only Permanent tables have Fail Safe (7 days). Transient and Temporary tables sacrifice Fail Safe for lower storage costs. External tables are read-only references to external data — Fail Safe doesn\'t apply.'},
+
+  // CORTEX AI
+  {id:37,cat:'Cortex AI',type:'mc',
+   q:'Which Snowflake Cortex function provides general-purpose LLM completions from a prompt?',
+   opts:['TRANSLATE()','AI_CLASSIFY()','AI_COMPLETE()','TRY_COMPLETE()'],
+   ans:2,
+   exp:'AI_COMPLETE() is the general-purpose function. It takes a model name and prompt and generates a response. Example: SELECT SNOWFLAKE.CORTEX.AI_COMPLETE(\'llama3-8b\', \'How many planets in the Solar System?\');'},
+  {id:38,cat:'Cortex AI',type:'mc',
+   q:'What does AI_PARSE_DOCUMENT() require for the stage containing the document?',
+   opts:['Public access with no authentication','Server-side encryption (SNOWFLAKE_SSE)','An external stage with a cloud URL','A named stage with AUTO_INGEST enabled'],
+   ans:1,
+   exp:'AI_PARSE_DOCUMENT() requires server-side encryption (SNOWFLAKE_SSE) on the stage. It supports OCR and LAYOUT modes, handles up to 100MB / 300 pages, and works with PDF, PPTX, and DOCX files.'},
+  {id:39,cat:'Cortex AI',type:'ms',
+   q:'Which of the following are components of the Snowflake Cortex suite? (Select ALL that apply)',
+   opts:['Snowflake Copilot','Document AI','Cortex Fine-tuning','Cortex Search','Snowsight','Cortex Analyst'],
+   ans:[0,1,2,3,5],
+   exp:'Snowflake Cortex includes: Cortex LLM Functions, Snowflake Copilot, Document AI, Cortex Fine-tuning, Cortex Search, and Cortex Analyst. Snowsight is the UI/worksheet environment — separate from Cortex.'},
+  {id:40,cat:'Cortex AI',type:'categorize',
+   q:'Categorize each Cortex function as Task-Specific (AI SQL) or a Helper function:',
+   cats:['Task-Specific (AI SQL)','Helper Function'],
+   items:[
+     {t:'AI_COMPLETE()',c:0},{t:'TRANSLATE()',c:0},{t:'AI_CLASSIFY()',c:0},{t:'AI_PARSE_DOCUMENT()',c:0},
+     {t:'TO_FILE()',c:1},{t:'COUNT_TOKENS()',c:1},{t:'TRY_COMPLETE()',c:1},{t:'PROMPT()',c:1}
+   ],
+   exp:'Task-Specific functions automate routine tasks: AI_COMPLETE(), AI_CLASSIFY(), AI_PARSE_DOCUMENT(), TRANSLATE(). Helper functions reduce failures in other LLM functions: TO_FILE(), PROMPT(), COUNT_TOKENS(), TRY_COMPLETE().'},
+
+  // DATA SHARING
+  {id:41,cat:'Data Sharing',type:'ms',
+   q:'Which data sharing/discovery features are NOT available for VPS? (Select ALL that apply)',
+   opts:['Marketplace','Data Exchange','Time Travel','Cloning','Data Sharing via Shares'],
+   ans:[0,1],
+   exp:'Both the Snowflake Marketplace and Data Exchange are NOT available for VPS (Virtual Private Snowflake). Time Travel, Cloning, and standard Data Sharing are still available. VPS prioritizes security and isolation above all else.'},
+  {id:42,cat:'Data Sharing',type:'mc',
+   q:'How do you enable a Data Exchange for your Snowflake organisation?',
+   opts:['Run ENABLE DATA EXCHANGE in Snowsight','Enable it in Account Settings under the Admin tab','Contact Snowflake Support to enable it','Any ACCOUNTADMIN can enable it via SQL'],
+   ans:2,
+   exp:'Data Exchange is NOT self-service — you must contact Snowflake Support to enable it. Once active, it allows sharing and controlling data between an invited group of entities (partners or within your org).'},
+  {id:43,cat:'Data Sharing',type:'mc',
+   q:'Which privilege is required to clone Pipes, Streams, and Tasks?',
+   opts:['SELECT','USAGE','OWNERSHIP','MODIFY'],
+   ans:2,
+   exp:'Cloning privileges: Tables → SELECT. Pipes, Streams, Tasks → OWNERSHIP. All other objects → USAGE. This distinction is commonly tested in exam questions about cloning requirements.'}
+];
+
+// ─── APP STATE ───────────────────────────────────────────────────────────────
+let deck = [...QS];
+let idx = 0, score = 0, history = []; // history: array of booleans
+let submitted = false;
+let selMC = null, selMS = new Set();
+let matchAnswers = {}, matchRights = [];
+let orderSeq = [], orderShuffled = [];
+let catAssignments = {}, catSelItem = null, catItems = [];
+let activeCat = 'all';
+
+// ─── UTILITIES ───────────────────────────────────────────────────────────────
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function letters(i){return String.fromCharCode(65+i);}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function initQ(q){
+  submitted=false; selMC=null; selMS=new Set();
+  matchAnswers={}; orderSeq=[];
+  catAssignments={}; catSelItem=null;
+  if(q.type==='match') matchRights=shuffle(q.pairs.map((_,i)=>i));
+  if(q.type==='order') orderShuffled=shuffle(q.items.map((_,i)=>i));
+  if(q.type==='categorize') catItems=shuffle(q.items.map((_,i)=>i));
+}
+
+// ─── CHECK ANSWERS ───────────────────────────────────────────────────────────
+function isCorrect(q){
+  if(q.type==='mc') return selMC===q.ans;
+  if(q.type==='ms'){
+    const a=new Set(q.ans), b=selMS;
+    return a.size===b.size && [...a].every(x=>b.has(x));
+  }
+  if(q.type==='match'){
+    return q.pairs.every((_,i)=>matchAnswers[i]!==undefined && parseInt(matchAnswers[i])===i);
+  }
+  if(q.type==='order'){
+    return orderSeq.join(',')===q.items.map((_,i)=>i).join(',');
+  }
+  if(q.type==='categorize'){
+    return q.items.every((item,i)=>catAssignments[i]===item.c);
+  }
+  return false;
+}
+
+function canSubmit(q){
+  if(q.type==='mc') return selMC!==null;
+  if(q.type==='ms') return selMS.size>0;
+  if(q.type==='match') return q.pairs.every((_,i)=>matchAnswers[i]!==undefined);
+  if(q.type==='order') return orderSeq.length===q.items.length;
+  if(q.type==='categorize') return Object.keys(catAssignments).length===q.items.length;
+  return false;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render(){
+  const app=document.getElementById('app');
+  if(idx>=deck.length){app.innerHTML=renderEnd();return;}
+  const q=deck[idx];
+  const pct=Math.round((idx/deck.length)*100);
+  const cats=['all','Architecture','Access Control','Data Loading','Warehouses','Data Protection','Cortex AI','Data Sharing'];
+  const typeLbl={mc:'Multiple Choice',ms:'Multiple Select',match:'Interactive — Match',order:'Interactive — Sequence',categorize:'Interactive — Categorise'};
+  const typeClass={mc:'t-mc',ms:'t-ms',match:'t-ix',order:'t-ix',categorize:'t-ix'};
+
+  app.innerHTML=`
+  <div class="hdr">
+    <div class="logo">
+      <svg class="sf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/>
         <circle cx="12" cy="2" r="1.5" fill="currentColor" stroke="none"/>
         <circle cx="12" cy="22" r="1.5" fill="currentColor" stroke="none"/>
         <circle cx="2" cy="12" r="1.5" fill="currentColor" stroke="none"/>
@@ -435,214 +482,244 @@
         <circle cx="19.07" cy="4.93" r="1.5" fill="currentColor" stroke="none"/>
         <circle cx="4.93" cy="19.07" r="1.5" fill="currentColor" stroke="none"/>
       </svg>
-      <h1>Snow<span>Pro</span> Flashcards</h1>
+      <h1>Snow<span>Pro</span> Exam</h1>
     </div>
-    <div class="subtitle">Associate: Platform Certification</div>
-  </header>
-
-  <div class="progress-wrap">
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    <div class="score-pill">Score <em>${score}/${idx}</em></div>
+  </div>
+  <div class="prog-row">
+    <div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <div class="prog-lbl">${idx+1} / ${deck.length}</div>
+  </div>
+  <div class="chips">
+    ${cats.map(c=>`<div class="chip${activeCat===c?' on':''}" onclick="filterCat('${c}',this)">${c==='all'?'All':c}</div>`).join('')}
+  </div>
+  <div class="qcard">
+    <div class="qcard-top">
+      <span class="type-badge ${typeClass[q.type]}">${typeLbl[q.type]}</span>
+      <span class="cat-tag">${q.cat}</span>
+      <span class="qnum">${q.id < 10 ? '0'+q.id : q.id}</span>
     </div>
-    <div class="progress-label" id="progressLabel">1 / 45</div>
+    <div class="qtext">${q.q}</div>
+    ${renderInteraction(q)}
+    ${submitted ? renderFeedback(q) : ''}
   </div>
-
-  <div class="category-row" id="categoryRow">
-    <div class="chip active" onclick="filterCategory('all', this)">All</div>
-    <div class="chip" onclick="filterCategory('Architecture', this)">Architecture</div>
-    <div class="chip" onclick="filterCategory('Access Control', this)">Access Control</div>
-    <div class="chip" onclick="filterCategory('Data Loading', this)">Data Loading</div>
-    <div class="chip" onclick="filterCategory('Warehouses', this)">Warehouses</div>
-    <div class="chip" onclick="filterCategory('Data Protection', this)">Data Protection</div>
-    <div class="chip" onclick="filterCategory('Cortex AI', this)">Cortex AI</div>
-    <div class="chip" onclick="filterCategory('Data Sharing', this)">Data Sharing</div>
+  <div class="btns">
+    ${!submitted ? `<button class="btn btn-prev" onclick="prevQ()" ${idx===0?'disabled':''}>← Prev</button>
+    <button class="btn btn-shuf" onclick="shuffleQ()">⇄ Shuffle</button>
+    <button class="btn" onclick="skipQ()">Skip →</button>
+    <button class="btn btn-submit" onclick="submitAnswer()" id="subBtn" ${canSubmit(q)?'':'disabled'}>Check Answer</button>`
+    : `<button class="btn btn-next" onclick="nextQ()">Next Question →</button>`}
   </div>
-
-  <div class="card-container">
-    <div class="card" id="card" onclick="flipCard()">
-      <div class="card-face card-front">
-        <div class="card-tag" id="cardCategory">Architecture</div>
-        <span class="card-num" id="cardNum">01</span>
-        <div class="card-body">
-          <div class="card-text" id="frontText"></div>
-        </div>
-        <div class="card-hint"><div class="hint-dot"></div>tap to reveal answer</div>
-        <svg class="corner-deco" viewBox="0 0 48 48" fill="none" stroke="white" stroke-width="1.5">
-          <line x1="24" y1="0" x2="24" y2="48"/>
-          <line x1="0" y1="24" x2="48" y2="24"/>
-          <line x1="6.86" y1="6.86" x2="41.14" y2="41.14"/>
-          <line x1="41.14" y1="6.86" x2="6.86" y2="41.14"/>
-        </svg>
-      </div>
-      <div class="card-face card-back">
-        <div class="card-tag">Answer</div>
-        <span class="card-num" id="cardNumBack">01</span>
-        <div class="card-body">
-          <div class="card-text" id="backText"></div>
-        </div>
-        <div class="card-hint"><div class="hint-dot" style="background:var(--accent2)"></div>tap to flip back</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="controls-main">
-    <button class="btn-prev" onclick="prevCard()">← Previous</button>
-    <button class="btn-next" onclick="nextCard()">Next →</button>
-  </div>
-  <div class="controls-secondary">
-    <button class="btn-flip" onclick="flipCard()">⟳ Flip Card</button>
-    <button class="btn-shuffle" onclick="shuffleDeck()">⇄ Shuffle</button>
-  </div>
-
-  <div class="kb-hint">
-    <kbd>←</kbd> prev &nbsp;·&nbsp; <kbd>→</kbd> next &nbsp;·&nbsp; <kbd>Space</kbd> flip
-  </div>
-</div>
-
-<script>
-const ALL_CARDS = [
-  // Architecture
-  { q: "What is Snowflake?", a: "AI Data Cloud Platform. Cloud native SaaS that separates Compute from Storage. Runs on AWS, GCP, and Azure. Fully managed with pay-as-you-go pricing.", cat: "Architecture" },
-  { q: "What are the 3 layers of Snowflake architecture?", a: "1. Database Storage\n2. Query Processing Layer\n3. Cloud Services", cat: "Architecture" },
-  { q: "What is the Database Storage layer?", a: "Elastic storage decoupled from compute. Data stored in optimized, compressed, columnar format in cloud storage. Accessible to all nodes but not directly by users.", cat: "Architecture" },
-  { q: "What is the Query Processing layer?", a: "Uses Virtual Warehouses (MPP clusters) for query execution. Each VW has its own temp memory/cache. Warehouses are independent — no performance impact on each other.", cat: "Architecture" },
-  { q: "What does the Cloud Services layer do?", a: "Coordinates all platform activities: Authentication & Access Control, Infrastructure Manager, Query Optimizer, Metadata Manager, and Security (encryption, network isolation).", cat: "Architecture" },
-  { q: "What are the 4 Snowflake editions?", a: "Standard → Enterprise → Business Critical → VPS (Virtual Private Snowflake). Each adds features; Enterprise adds Multi-Cluster VW, Materialized Views, Extended Time Travel.", cat: "Architecture" },
-  { q: "What is Snowsight?", a: "Snowflake's web UI. Supports Worksheets (SQL/Python) and Notebooks. For each account you choose Edition, cloud provider, and Region.", cat: "Architecture" },
-  { q: "What is the Snowflake container hierarchy?", a: "Organization → Account → Database → Schema → Objects (Tables, Views, Stages, etc.)", cat: "Architecture" },
-  { q: "What are the 3 types of Snowflake Views?", a: "1. Non-Materialized View — virtual, no storage\n2. Materialized View — pre-computed, stored, faster (Enterprise+)\n3. Secure View — extra security layer (for either type)", cat: "Architecture" },
-  { q: "What are Snowflake Notebooks?", a: "Interactive environment requiring a Warehouse. Supports Python, SQL, Markdown. Supports cell-by-cell or full execution, Streamlit visualizations, variable substitution, and scheduling.", cat: "Architecture" },
-
-  // Access Control
-  { q: "What is DAC?", a: "Discretionary Access Control — each object has an owner who can grant access to that object.", cat: "Access Control" },
-  { q: "What is RBAC?", a: "Role-Based Access Control — access privileges are assigned to roles, which are in turn assigned to users.", cat: "Access Control" },
-  { q: "What are the 4 components of Snowflake access control?", a: "1. Securable Object — entity to which access can be granted\n2. Role — entity holding privileges\n3. Privilege — defined level of access\n4. User — identity recognized by Snowflake", cat: "Access Control" },
-  { q: "What does ORGADMIN do?", a: "Manages operations at organization level. Can create accounts, view all accounts in the org, and check usage info. Run: SHOW ORGANIZATION ACCOUNTS, SHOW REGIONS.", cat: "Access Control" },
-  { q: "What does ACCOUNTADMIN do?", a: "Top account-level role. Parent to SYSADMIN and SECURITYADMIN. Should be limited to few people.", cat: "Access Control" },
-  { q: "What does SECURITYADMIN do?", a: "Manages any grant globally. Creates/manages/monitors users and roles. Inherits USERADMIN privileges.", cat: "Access Control" },
-  { q: "What does SYSADMIN do?", a: "Creates warehouses, databases, and other objects. All custom roles should be assigned to SYSADMIN.", cat: "Access Control" },
-  { q: "What does USERADMIN do?", a: "Granted CREATE USER and CREATE ROLE privileges. Can create users and roles in the account.", cat: "Access Control" },
-  { q: "What is the PUBLIC role?", a: "Pseudo-role automatically granted to all users and roles. All users can access objects owned by PUBLIC. Used when explicit access control is not needed.", cat: "Access Control" },
-  { q: "What are Account Roles vs Database Roles?", a: "Account Roles: permit SQL actions on any object in the account.\nDatabase Roles: limit SQL actions to a single database only.", cat: "Access Control" },
-  { q: "What are Primary and Secondary Roles?", a: "Primary Role: the default assumed role (USE ROLE <name>).\nSecondary Role: any number can be assigned at once to extend privileges.", cat: "Access Control" },
-
-  // Data Loading
-  { q: "What is a Snowflake Stage?", a: "A named location of data files in cloud storage. Snowflake refers to these as stages. Used to load/unload data.", cat: "Data Loading" },
-  { q: "What are the types of internal stages?", a: "Table Stage (@%): auto-created per table, multi-user for 1 table.\nUser Stage (@~): auto-created per user, single user for multiple tables.\nNamed Stage (@): created by user, can be altered/dropped.", cat: "Data Loading" },
-  { q: "What is a Named External Stage?", a: "Created by user, refers to an object on cloud storage. Specifies a URL. Cannot point to archived data. Can be altered/dropped.", cat: "Data Loading" },
-  { q: "What semi-structured data formats can Snowflake LOAD?", a: "JSON, Avro, ORC, Parquet, XML", cat: "Data Loading" },
-  { q: "What semi-structured data formats can Snowflake UNLOAD?", a: "JSON and Parquet only", cat: "Data Loading" },
-  { q: "What are the 3 Snowflake semi-structured data types?", a: "ARRAY (max 16MB) — ordered list of same-type values\nOBJECT (max 16MB) — unordered key-value pairs\nVARIANT (max 16MB) — stores any semi-structured data (JSON, XML, etc.)", cat: "Data Loading" },
-  { q: "What are the 3 types of URLs for unstructured data access?", a: "Scoped URL: temporary, only the generating user, expires with query cache (24h).\nFile URL (BUILD_STAGE_FILE_URL): permanent, user with stage access.\nPre-signed URL (GET_PRESIGNED_URL): anyone with the URL, configurable expiry.", cat: "Data Loading" },
-  { q: "What are the 4 Snowflake table types?", a: "Permanent: until dropped, 7-day fail-safe, 0–90 day time travel.\nTransient: until dropped, 0-day fail-safe.\nTemporary: session only, 0-day fail-safe.\nExternal: read-only, points to external stage.", cat: "Data Loading" },
-  { q: "What is a Directory in Snowflake?", a: "An implicit object layered on a stage that stores file-level metadata. Can be enabled for internal/external stages. Data refreshed manually or auto (external only). No explicit privilege needed.", cat: "Data Loading" },
-
-  // Warehouses
-  { q: "What is a Virtual Warehouse?", a: "A cluster of compute resources (MPP) used to execute SQL queries and data loading. Decoupled from storage. Each has its own cache and is independent of others.", cat: "Warehouses" },
-  { q: "What is Scale Out (Multi-Cluster)?", a: "Adding more clusters to handle concurrent queries. Requires Enterprise Edition or higher. Soft limit of 10 max clusters. Can be automated.", cat: "Warehouses" },
-  { q: "What is Scale Up?", a: "Increasing the size of a single warehouse (e.g., Small → Medium → Large) to handle more complex queries.", cat: "Warehouses" },
-  { q: "What is the Standard Scaling Policy?", a: "Starts a cluster when a query is queued (waits 20s between each). Shuts down when load can redistribute — after 2–3 consecutive checks at 1-minute intervals.", cat: "Warehouses" },
-  { q: "What is the Economy Scaling Policy?", a: "Starts a cluster only when there's enough load to run for 6 minutes. Shuts down after 5–6 consecutive checks at 1-minute intervals. Conserves credits.", cat: "Warehouses" },
-  { q: "Standard vs Multi-Cluster Warehouse?", a: "Standard: single cluster, best for stable/predictable workloads.\nMulti-Cluster: multiple clusters, scales dynamically, best for high concurrency and variable workloads (Enterprise+).", cat: "Warehouses" },
-
-  // Data Protection
-  { q: "What is Snowflake Time Travel?", a: "Access historical data using AT/BEFORE with TIMESTAMP, OFFSET, or STATEMENT. Standard: 0–1 days. Enterprise+: 0–90 days. Supports SELECT, CREATE CLONE, and UNDROP.", cat: "Data Protection" },
-  { q: "What is Fail Safe?", a: "7-day period after Time Travel for permanent tables. No user operations allowed — only Snowflake staff can recover data. Transient/Temporary tables have 0-day Fail Safe.", cat: "Data Protection" },
-  { q: "What is Cloning in Snowflake?", a: "Creates an exact copy of a database, schema, or table. Zero-copy — uses metadata pointers to existing micro-partitions. Does NOT copy load metadata. Takes start time of job (in-between updates not cloned).", cat: "Data Protection" },
-  { q: "What objects CAN be cloned?", a: "Database, Schema, Tables, File Format, Sequence, Tags, Streams (unconsumed records remain). Cloning with Time Travel: only Database, Schema, Table & Streams.", cat: "Data Protection" },
-  { q: "What objects CANNOT be cloned?", a: "Users, Roles, Grants, Virtual Warehouses, Resource Monitors, Storage Integrations, Policies, External Stages, Table Stages, Temporary Tables, Views (individually).", cat: "Data Protection" },
-  { q: "When does Cloning fail?", a: "1. Source object in the past doesn't exist.\n2. Pipe object with AUTO_INGEST = TRUE is recreated.\n3. DATA_RETENTION_TIME_IN_DAYS = 0 (job may fail).", cat: "Data Protection" },
-
-  // Cortex AI
-  { q: "What is Snowflake Cortex?", a: "A suite of AI features using LLMs. Includes: Cortex LLM Functions, Snowflake Copilot, Document AI, Cortex Fine-tuning, Cortex Search, and Cortex Analyst.", cat: "Cortex AI" },
-  { q: "What are Cortex Task-Specific (AI SQL) functions?", a: "AI_COMPLETE() — general LLM completion.\nAI_CLASSIFY() — classify text into categories.\nAI_PARSE_DOCUMENT() — extract content from staged docs.\nTRANSLATE() — translate between languages.", cat: "Cortex AI" },
-  { q: "What are Cortex Helper functions?", a: "TO_FILE() — reference a staged file.\nPROMPT() — construct prompts.\nCOUNT_TOKENS() — count tokens.\nTRY_COMPLETE() — reduces failures from other LLM functions.", cat: "Cortex AI" },
-  { q: "What does AI_PARSE_DOCUMENT() support?", a: "Extracts content from staged documents. Supports OCR and LAYOUT modes. Limit: 100MB, 300 pages. Supported types: PDF, PPTX, DOCX. Stage must be server-side encrypted.", cat: "Cortex AI" },
-
-  // Data Sharing
-  { q: "What is the Snowflake Marketplace?", a: "Provides a wide variety of data, apps, and services. Native to Snowflake. Lots of free and freemium offerings. NOT available for VPS (Virtual Private Snowflake).", cat: "Data Sharing" },
-  { q: "What is a Data Exchange?", a: "Enables data sharing between an invited group of entities. Must contact Snowflake Support to enable it. Can share within your org or with external partners. NOT available for VPS.", cat: "Data Sharing" },
-];
-
-let deck = [...ALL_CARDS];
-let currentIndex = 0;
-let isFlipped = false;
-let activeCategory = 'all';
-
-function filterCategory(cat, el) {
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  activeCategory = cat;
-  deck = cat === 'all' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.cat === cat);
-  currentIndex = 0;
-  updateCard(true);
+  <div class="kb"><kbd>Space</kbd> check &nbsp;·&nbsp; <kbd>→</kbd> next/skip &nbsp;·&nbsp; <kbd>←</kbd> prev</div>
+  `;
 }
 
-function updateCard(animate = false) {
-  const card = document.getElementById('card');
-  if (isFlipped) {
-    card.classList.remove('flipped');
-    isFlipped = false;
-  }
+function renderInteraction(q){
+  if(q.type==='mc') return renderMC(q);
+  if(q.type==='ms') return renderMS(q);
+  if(q.type==='match') return renderMatch(q);
+  if(q.type==='order') return renderOrder(q);
+  if(q.type==='categorize') return renderCat(q);
+  return '';
+}
 
-  const current = deck[currentIndex];
-  const num = String(currentIndex + 1).padStart(2, '0');
+function renderMC(q){
+  return `<div class="opts">${q.opts.map((o,i)=>{
+    let cls='opt';
+    if(submitted){
+      cls+=' done';
+      if(i===q.ans) cls+=' reveal';
+      if(i===selMC && i!==q.ans) cls+=' bad';
+      if(i===selMC && i===q.ans) cls+=' ok';
+    } else if(i===selMC) cls+=' sel';
+    const icon=submitted?(i===q.ans?'✓':i===selMC?'✗':''):'';
+    return `<button class="${cls}" onclick="${submitted?'':'selMCOpt('+i+')'}" ${submitted?'disabled':''}>
+      <span class="opt-key">${letters(i)}</span>
+      <span class="opt-txt">${o}</span>
+      ${icon?`<span class="opt-ico">${icon}</span>`:''}
+    </button>`;
+  }).join('')}</div>`;
+}
 
-  // Small delay to let flip reset
-  setTimeout(() => {
-    document.getElementById('cardCategory').textContent = current.cat;
-    document.getElementById('frontText').textContent = current.q;
-    document.getElementById('backText').textContent = current.a;
-    document.getElementById('cardNum').textContent = num;
-    document.getElementById('cardNumBack').textContent = num;
+function renderMS(q){
+  return `<div class="opts">${q.opts.map((o,i)=>{
+    let cls='opt';
+    const isCorrectAns=q.ans.includes(i);
+    if(submitted){
+      cls+=' done';
+      if(isCorrectAns && selMS.has(i)) cls+=' ok';
+      else if(!isCorrectAns && selMS.has(i)) cls+=' bad';
+      else if(isCorrectAns && !selMS.has(i)) cls+=' reveal';
+    } else if(selMS.has(i)) cls+=' sel';
+    const checked=selMS.has(i)||((submitted)&&isCorrectAns)?'✓':'';
+    const icon=submitted?(isCorrectAns&&selMS.has(i)?'✓':(!isCorrectAns&&selMS.has(i))?'✗':isCorrectAns?'✓':''):'';
+    return `<button class="${cls}" onclick="${submitted?'':'toggleMS('+i+')'}" ${submitted?'disabled':''}>
+      <span class="chk">${selMS.has(i)||((submitted)&&isCorrectAns)?'✓':''}</span>
+      <span class="opt-txt">${o}</span>
+      ${submitted&&icon?`<span class="opt-ico">${icon}</span>`:''}
+    </button>`;
+  }).join('')}</div>`;
+}
 
-    if (animate) {
-      card.classList.add('card-anim');
-      setTimeout(() => card.classList.remove('card-anim'), 300);
+function renderMatch(q){
+  return `<div class="match-wrap">${q.pairs.map((p,i)=>{
+    const selVal=matchAnswers[i];
+    let selClass='';
+    if(submitted){
+      selClass=parseInt(selVal)===i?'ok':'bad';
     }
-  }, isFlipped ? 300 : 0);
-
-  const pct = ((currentIndex + 1) / deck.length) * 100;
-  document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${currentIndex + 1} / ${deck.length}`;
+    const rights=matchRights.map(ri=>q.pairs[ri].r);
+    return `<div class="match-row">
+      <div class="match-lbl">${p.l}</div>
+      <select class="match-sel ${submitted?selClass:''}" data-li="${i}" onchange="setMatch(${i},this.value)" ${submitted?'disabled':''}>
+        <option value="">— Select —</option>
+        ${matchRights.map((ri,di)=>`<option value="${ri}" ${selVal!==undefined&&parseInt(selVal)===ri?'selected':''}>${q.pairs[ri].r}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('')}</div>`;
 }
 
-function flipCard() {
-  const card = document.getElementById('card');
-  card.classList.toggle('flipped');
-  isFlipped = !isFlipped;
+function renderOrder(q){
+  const poolItems=orderShuffled.filter(i=>!orderSeq.includes(i));
+  const allPlaced=orderSeq.length===q.items.length;
+  return `
+  <div class="ord-hint">Click items in the correct order (1 → ${q.items.length}). Click a numbered item to undo.</div>
+  <div class="ord-pool">
+    ${poolItems.length===0&&!submitted?'<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted)">All placed — check or undo</span>':''}
+    ${orderShuffled.map(oi=>{
+      const seqPos=orderSeq.indexOf(oi);
+      const isPlaced=seqPos!==-1;
+      if(!isPlaced&&submitted) return '';
+      if(!isPlaced) return `<div class="ord-chip" onclick="clickOrderItem(${oi})">${q.items[oi]}</div>`;
+      let cls='ord-chip placed';
+      if(submitted) cls+= oi===seqPos?' ok':' bad'; // simplified: check by correct position
+      return `<div class="${cls}" onclick="${submitted?'':'unclickOrderItem('+oi+')'}" ${submitted?'disabled':''}>
+        <span class="ord-num">${seqPos+1}</span>${q.items[oi]}
+      </div>`;
+    }).join('')}
+  </div>
+  ${submitted?`<div class="ord-seq"><div style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted);margin-bottom:8px;letter-spacing:.5px;">CORRECT ORDER</div>
+    ${q.items.map((it,ci)=>`<div class="ord-slot"><span class="slot-n">${ci+1}.</span><span class="slot-txt" style="color:var(--green)">${it}</span></div>`).join('')}
+  </div>`:''}`;
 }
 
-function nextCard() {
-  if (currentIndex < deck.length - 1) {
-    currentIndex++;
-    updateCard(true);
-  }
+function renderCat(q){
+  const unassigned=catItems.filter(i=>catAssignments[i]===undefined);
+  return `
+  <div class="cat-pool">
+    ${catItems.map(i=>{
+      const isAssigned=catAssignments[i]!==undefined;
+      if(isAssigned) return '';
+      const isSel=catSelItem===i;
+      let cls='cat-chip'+(isSel?' sel-chip':'');
+      return `<div class="${cls}" onclick="${submitted?'':'clickCatItem('+i+')'}">${q.items[i].t}</div>`;
+    }).join('')}
+    ${unassigned.length===0&&!submitted?'<span style="font-family:DM Mono,monospace;font-size:11px;color:var(--muted)">All assigned — check or undo</span>':''}
+  </div>
+  <div class="cat-buckets">
+    ${q.cats.map((cat,ci)=>`
+    <div class="bucket${catSelItem!==null?' hot':''}${submitted?' done':''}" onclick="${submitted?'':'assignCatItem('+ci+')'}">
+      <div class="bkt-lbl">${cat}</div>
+      <div class="bkt-items">
+        ${catItems.filter(i=>catAssignments[i]===ci).map(i=>{
+          let cls='bkt-item';
+          if(submitted) cls+= q.items[i].c===ci?' ok':' bad';
+          return `<div class="${cls}">${q.items[i].t}</div>`;
+        }).join('')}
+      </div>
+    </div>`).join('')}
+  </div>`;
 }
 
-function prevCard() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    updateCard(true);
-  }
+function renderFeedback(q){
+  const ok=isCorrect(q);
+  return `<div class="feedback ${ok?'ok':'bad'}">
+    <div class="fb-lbl">${ok?'✓ Correct':'✗ Incorrect'}</div>
+    ${q.exp}
+  </div>`;
 }
 
-function shuffleDeck() {
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
-  }
-  currentIndex = 0;
-  updateCard(true);
+function renderEnd(){
+  const total=deck.length;
+  const pct=Math.round((score/total)*100);
+  let msg='';
+  if(pct>=85) msg='Outstanding! You\'re well-prepared — aim for that 750+ score.';
+  else if(pct>=70) msg='Good progress. Review the topics you missed and retake.';
+  else if(pct>=50) msg='Keep going! Focus on Data Loading & Architecture (75% of the exam).';
+  else msg='More study needed. Revisit the slides and study guide, then retry.';
+  const dots=history.map(ok=>`<div class="end-dot" style="background:${ok?'var(--green)':'var(--red)'}"></div>`).join('');
+  return `<div class="end">
+    <div class="end-pct">${pct}%</div>
+    <div class="end-frac">${score} / ${total} correct</div>
+    <div class="end-msg">${msg}</div>
+    <div class="end-bar">${dots}</div>
+    <div class="btns" style="max-width:320px;margin:0 auto;">
+      <button class="btn btn-shuf" onclick="restartAll()" style="grid-column:1/-1">⇄ Restart &amp; Shuffle</button>
+    </div>
+  </div>`;
 }
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft') prevCard();
-  if (e.key === 'ArrowRight') nextCard();
-  if (e.key === ' ') { e.preventDefault(); flipCard(); }
+// ─── INTERACTION HANDLERS ────────────────────────────────────────────────────
+function selMCOpt(i){selMC=i;render();}
+function toggleMS(i){selMS.has(i)?selMS.delete(i):selMS.add(i);render();}
+function setMatch(li,val){matchAnswers[li]=val;render();}
+function clickOrderItem(oi){if(!orderSeq.includes(oi)){orderSeq.push(oi);}render();}
+function unclickOrderItem(oi){orderSeq=orderSeq.filter(x=>x!==oi);render();}
+function clickCatItem(i){catSelItem=(catSelItem===i)?null:i;render();}
+function assignCatItem(ci){
+  if(catSelItem===null) return;
+  catAssignments[catSelItem]=ci;
+  catSelItem=null;
+  render();
+}
+
+function submitAnswer(){
+  if(!canSubmit(deck[idx])) return;
+  submitted=true;
+  const ok=isCorrect(deck[idx]);
+  if(ok) score++;
+  history.push(ok);
+  render();
+}
+
+function nextQ(){idx++;if(idx<deck.length)initQ(deck[idx]);render();}
+function prevQ(){if(idx>0){idx--;initQ(deck[idx]);render();}}
+function skipQ(){idx++;if(idx<deck.length)initQ(deck[idx]);render();}
+
+function filterCat(cat,el){
+  activeCat=cat;
+  deck=cat==='all'?[...QS]:QS.filter(q=>q.cat===cat);
+  idx=0; score=0; history=[];
+  initQ(deck[0]);
+  render();
+}
+
+function shuffleQ(){
+  deck=shuffle(deck);
+  idx=0; score=0; history=[];
+  initQ(deck[0]);
+  render();
+}
+
+function restartAll(){
+  deck=shuffle([...QS]);
+  idx=0; score=0; history=[];
+  activeCat='all';
+  initQ(deck[0]);
+  render();
+}
+
+// ─── KEYBOARD ────────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'){if(submitted)nextQ();else skipQ();}
+  if(e.key==='ArrowLeft') prevQ();
+  if(e.key===' '){e.preventDefault();if(!submitted&&canSubmit(deck[idx]))submitAnswer();}
 });
 
-updateCard();
+// ─── START ───────────────────────────────────────────────────────────────────
+deck=shuffle([...QS]);
+initQ(deck[0]);
+render();
 </script>
 </body>
 </html>
